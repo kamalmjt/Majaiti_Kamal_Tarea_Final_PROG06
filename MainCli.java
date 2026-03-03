@@ -2,12 +2,12 @@ import java.io.File;
 
 public class MainCli {
 	
-	public static Biblioteca biblitoeca = new Biblioteca();
+	public static Biblioteca biblioteca = new Biblioteca();
 	public static final String  csvBiblioteca="./datosBiblioteca.csv";
 	
 
 	public static void main(String[] args) {
-		leerCSVBiblioteca();
+		Utilidades.leerCSVBiblioteca(MainCli.csvBiblioteca, MainCli.biblioteca);
 		imprimirMenuPrincipal();
 
 	}
@@ -38,7 +38,7 @@ public class MainCli {
 				break;
 				
 			case 2:
-				String listado=MainCli.biblitoeca.mostrarListadoLibros();
+				String listado=MainCli.biblioteca.mostrarListadoLibros();
 				System.out.println(listado);
 				Utilidades.pausarInteracion();
 				break;
@@ -59,7 +59,7 @@ public class MainCli {
 				break;
 				
 			case 6:
-				boolean resultadoSalvado=FicheroLibros.escribirFichero(csvBiblioteca, biblitoeca);
+				boolean resultadoSalvado=FicheroLibros.escribirFichero(csvBiblioteca, biblioteca);
 				String mensaje=(resultadoSalvado)?"Guardado realizado correctamente.":"Error al guardar el fichero";
 				System.out.println(mensaje);
 				Utilidades.pausarInteracion();
@@ -90,7 +90,7 @@ public class MainCli {
 		String autor=Utilidades.leerStringValida("autor");
 		
 		Libro libroNuevoAlta=new Libro(isbn, titulo, autor, true);
-		boolean resultadoAlta=MainCli.biblitoeca.anyadirLibro(libroNuevoAlta);
+		boolean resultadoAlta=MainCli.biblioteca.anyadirLibro(libroNuevoAlta);
 		String mensaje=(resultadoAlta)?"El libro se ha dado de alta correctamente.":"El libro no se ha dado de alta";
 		System.out.println(mensaje);
 		return;		
@@ -102,7 +102,7 @@ public class MainCli {
 		System.out.println("---- Opcion Prestar Libro -----");
 		System.out.print("Dime el ISBN: ");
 		String isbn=Utilidades.leerStringValida("ISBN");
-		boolean resultadoPrestamo=MainCli.biblitoeca.prestarLibro(isbn);
+		boolean resultadoPrestamo=MainCli.biblioteca.prestarLibro(isbn);
 		String mensaje=(resultadoPrestamo)?"El libro se ha prestado correctamente.":"El libro no se ha prestado, porque estaba ya prestado o no existe.";
 		System.out.println(mensaje);
 		return;		
@@ -114,7 +114,7 @@ public class MainCli {
 		System.out.println("---- Opcion Devolver Libro -----");
 		System.out.print("Dime el ISBN: ");
 		String isbn=Utilidades.leerStringValida("ISBN");
-		boolean resultadoPrestamo=MainCli.biblitoeca.devolverLibro(isbn);
+		boolean resultadoPrestamo=MainCli.biblioteca.devolverLibro(isbn);
 		String mensaje=(resultadoPrestamo)?"El libro se ha devuelto correctamente.":"El libro no se ha devuelto, porque no esta prestado o no existe.";
 		System.out.println(mensaje);
 		return;		
@@ -125,7 +125,7 @@ public class MainCli {
 		System.out.println("---- Opcion Buscar Libro -----");
 		System.out.print("Dime el ISBN: ");
 		String isbn=Utilidades.leerStringValida("ISBN");
-		Libro libroBuscado=MainCli.biblitoeca.buscarLibro(isbn);
+		Libro libroBuscado=MainCli.biblioteca.buscarLibro(isbn);
 		if(libroBuscado==null) {
 			System.out.println("El libro que busca con ISBN: " + isbn + " no existe.");
 			return;
@@ -133,23 +133,5 @@ public class MainCli {
 		System.out.println(libroBuscado.toString());
 		return;		
 	}
-	
-	private static void leerCSVBiblioteca() {
-		
-		// Comprobamos si existe el fichero.
-		// https://stackoverflow.com/questions/1816673/how-do-i-check-if-a-file-exists-in-java
-		File ficheroCSV = new File(csvBiblioteca);
-		if (!ficheroCSV.exists() || !ficheroCSV.isFile()) {	
-		    System.out.println("El fichero CSV de la biblioteca no existe o es un directorio, no se cargan libros guardados...");
-		    return;
-		} else {
-			boolean resultadoLecturaCSV=FicheroLibros.leerFichero(csvBiblioteca, biblitoeca);
-			String mensaje=(resultadoLecturaCSV)?"Fichero CSV cargado correctamente":"Error al cargar el fichero csv";
-			System.out.println(mensaje);
-		}
-		
-		
-		
-		
-	}
+
 }
