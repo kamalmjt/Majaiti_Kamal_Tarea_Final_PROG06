@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class MainGUI {
@@ -35,7 +36,14 @@ public class MainGUI {
 	public static void main(String[] args) {
 		MainGUI.biblioteca = new Biblioteca();
 		Utilidades.leerCSVBiblioteca(MainGUI.csvBiblioteca, MainGUI.biblioteca);
-		MainGUI.construirInterfaz();
+		
+		// Lanzamos la GUI.
+		// https://docs.oracle.com/javase/tutorial/uiswing/concurrency/initial.html
+		SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+		    	MainGUI.construirInterfaz();
+		    }
+		});
 
 	}
 
