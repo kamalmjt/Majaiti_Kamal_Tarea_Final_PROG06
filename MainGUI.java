@@ -141,15 +141,16 @@ public class MainGUI {
 	public static void accionBuscarPorISBN() {
 
 		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres buscar:", "Buscar Libro");
+
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
 			Utilidades.MensajeError("El ISBN que buscas no existe.");
 			return;
-		} else {
-			Libro libroBuscado = MainGUI.biblioteca.buscarLibro(isbn);
-			refrescarTabla(libroBuscado);
-			Utilidades.MensajeInfo("El ISBN que buscas se ha encontrado y se muestra en la tabla filtrado.");
+		} 
 
-		}
+		Libro libroBuscado = MainGUI.biblioteca.buscarLibro(isbn);
+		refrescarTabla(libroBuscado);
+		Utilidades.MensajeInfo("El ISBN que buscas se ha encontrado y se muestra en la tabla filtrado.");
+
 
 	}
 
@@ -180,12 +181,12 @@ public class MainGUI {
 
 	public static void accionGuardar() {
 		boolean resultadoSalvado=FicheroLibros.escribirFichero(MainGUI.csvBiblioteca, MainGUI.biblioteca);
-		
-		if(resultadoSalvado) {
-			Utilidades.MensajeInfo("Guardado realizado correctamente.");
-		} else {
-			Utilidades.MensajeError("Error al guardar el fichero");
+		if (!resultadoSalvado) {
+			Utilidades.MensajeError("Error al guardar el fichero, revisa la consola de excepciones.");
+			return;
 		}
+
+		Utilidades.MensajeInfo("Guardado realizado correctamente.");
 	}
 	
 	
@@ -195,17 +196,15 @@ public class MainGUI {
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
 			Utilidades.MensajeError("El ISBN que quieres devolver no existe. \n Datos del ISBN: " + isbn); 
 			return;
-		} else {
-			boolean estadoDevolucion = MainGUI.biblioteca.devolverLibro(isbn);
-			if (estadoDevolucion) {
-				refrescarTabla();
-				Utilidades.MensajeInfo("El ISBN con ISBN" + isbn +" se ha marcado como devuelto y se muestra en la tabla actualizado.");	
-			} else {
-				Utilidades.MensajeError("El Libro que intentas devolver con el ISBN: " + isbn + " no esta prestado.");
-			}
-			
-
+		} 
+		boolean estadoDevolucion = MainGUI.biblioteca.devolverLibro(isbn);
+		if (!estadoDevolucion) {
+			Utilidades.MensajeError("El Libro que intentas devolver con el ISBN: " + isbn + " no esta prestado.");
+			return;
 		}
+		
+		refrescarTabla();
+		Utilidades.MensajeInfo("El ISBN con ISBN" + isbn +" se ha marcado como devuelto y se muestra en la tabla actualizado.");	
 
 	}
 	
@@ -216,18 +215,16 @@ public class MainGUI {
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
 			Utilidades.MensajeError("El ISBN que quieres prestar no existe. \n Datos del ISBN: " + isbn); 
 			return;
-		} else {
-			boolean estadoPrestamo = MainGUI.biblioteca.prestarLibro(isbn);
-			if (estadoPrestamo) {
-				refrescarTabla();
-				Utilidades.MensajeInfo("El libro con ISBN "+isbn+" se ha marcado como prestado y se muestra en la tabla actualizado.");	
-			} else {
-				Utilidades.MensajeError("ERROR: El Libro que intentas prestar con el ISBN: " + isbn + " ya esta prestado previamente y no se puede prestar.");
-			}
-			
+		} 
 
+		boolean estadoPrestamo = MainGUI.biblioteca.prestarLibro(isbn);
+		if (!estadoPrestamo) {
+			Utilidades.MensajeError("ERROR: El Libro que intentas prestar con el ISBN: " + isbn + " ya esta prestado previamente y no se puede prestar.");
+			return;
 		}
-
+		
+		refrescarTabla();
+		Utilidades.MensajeInfo("El libro con ISBN "+isbn+" se ha marcado como prestado y se muestra en la tabla actualizado.");	
 	}
 	
 	public static void limpiarFormulario() {
@@ -264,17 +261,12 @@ public class MainGUI {
 	    Libro nuevoLibro=new Libro(isbn, titulo, autor, true);
 	    boolean resultadoAnyadirLibro=MainGUI.biblioteca.anyadirLibro(nuevoLibro);
 	    
-	    if (resultadoAnyadirLibro) {
-	    	Utilidades.MensajeInfo("El libro se ha añadido con exito, se actualiza y se muestra la tabla.");
-	    	MainGUI.refrescarTabla();
-	    	MainGUI.limpiarFormulario();
-	    	return ;
-	    } else {
+	    if (!resultadoAnyadirLibro) {
 	    	Utilidades.MensajeError("Error al añadir el libro, revisa la consola de excepciones.");
 	    	return ;
 	    }
-	    
-
-		
+		Utilidades.MensajeInfo("El libro se ha añadido con exito, se actualiza y se muestra la tabla.");
+		MainGUI.refrescarTabla();
+		MainGUI.limpiarFormulario();
 	}
 }
