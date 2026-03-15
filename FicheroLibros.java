@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class FicheroLibros {
 
-	public static boolean leerFichero(String fichero, Biblioteca biblioteca) {
+	public static boolean leerFichero(String fichero, Biblioteca biblioteca, boolean usarGUI) {
 		FileReader lectorFichero;
 		int lineaLeida = 0;
 		String linea = "";
@@ -34,9 +34,8 @@ public class FicheroLibros {
 					String[] partesLinea = linea.split(";");
 
 					if (partesLinea.length != 4) {
-
-						System.out
-								.println("El formato de la linea" + lineaLeida + " es incorrecto, se ignora el dato..");
+						Utilidades.mensajeAdaptativo(usarGUI, true, "El formato de la linea " + lineaLeida + " es incorrecto, se ignora el dato..");
+						
 						continue;
 					}
 
@@ -45,21 +44,22 @@ public class FicheroLibros {
 					if (Utilidades.validarStringNumerosYLetrasInsensibleMayus(partesLinea[0].trim())) {
 						titulo = partesLinea[0].trim();
 					} else {
-						System.out.println("El titulo no es valido, se ignora la linea Nº: " + lineaLeida);
+						Utilidades.mensajeAdaptativo(usarGUI, true, "El titulo no es valido, se ignora la linea Nº: " + lineaLeida);
 						continue;
 					}
 
 					if (Utilidades.validarStringNumerosYLetrasInsensibleMayus(partesLinea[1].trim())) {
 						autor = partesLinea[1].trim();
 					} else {
-						System.out.println("El autor no es valido, se ignora la linea Nº: " + lineaLeida);
+						
+						Utilidades.mensajeAdaptativo(usarGUI, true, "El autor no es valido, se ignora la linea Nº: " + lineaLeida);
 						continue;
 					}
 
 					if (Utilidades.validarStringNumerosYLetrasInsensibleMayus(partesLinea[2].trim())) {
 						isbn = partesLinea[2].trim();
 					} else {
-						System.out.println("El isbn no es valido, se ignora la linea Nº: " + lineaLeida);
+						Utilidades.mensajeAdaptativo(usarGUI, true, "El isbn no es valido, se ignora la linea Nº: " + lineaLeida);
 						continue;
 					}
 
@@ -73,48 +73,52 @@ public class FicheroLibros {
 							disponible = Boolean.parseBoolean(disponibleStr);
 
 						} catch (Exception e) {
-							System.out.println(
-									"Error al marcar la disponibilidad del libro, el formato no es correcto.\n " + e);
+
+							Utilidades.mensajeAdaptativo(usarGUI, true, "Error al marcar la disponibilidad del libro Nº ,"+ lineaLeida + " del CSV, el formato no es correcto y se marca como no disponible por defecto.\n " + e);
 							// Lo marcamos como no dispnible hasta que lo encuentre el bibliotecario.
 							disponible = false;
 						}
 					} else {
 
-						System.out.println("Error al marcar la disponibilidad del libro, el formato no es correcto.\n");
+						Utilidades.mensajeAdaptativo(usarGUI, true, "Error al marcar la disponibilidad del libro Nº ,"+ lineaLeida + " del CSV, el formato no es correcto y se marca como no disponible por defecto.");
 						// Lo marcamos como no dispnible hasta que lo encuentre el bibliotecario.
 						disponible = false;
 
 					}
 
 					Libro libroLeido = new Libro(isbn, titulo, autor, disponible);
-					biblioteca.anyadirLibro(libroLeido);
+					biblioteca.altaLibro(libroLeido);
 
 				}
-				System.out.println("Libros cargados desde el csv correctamente.");
+
 				return true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				System.out.println("Error de IO al leer el fichero");
+
+				Utilidades.mensajeAdaptativo(usarGUI, true, "Error de IO al leer el fichero");
 				e.printStackTrace();
 				return false;
 			}
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			System.out.println("No se ha encontrado el fichero indicado.");
+			Utilidades.mensajeAdaptativo(usarGUI, true, "No se ha encontrado el fichero indicado.");
 			e.printStackTrace();
 			return false;
 		}
 
 	}
 
-	public static boolean escribirFichero(String fichero, Biblioteca biblioteca) {
+	public static boolean escribirFichero(String fichero, Biblioteca biblioteca, boolean usarGUI) {
 		FileWriter escritorFichero;
 
 		// Comprobamos que el fichero no es un directorio para evitar un crash.
 		// https://stackoverflow.com/questions/1816673/how-do-i-check-if-a-file-exists-in-java
 		File ficheroCSV = new File(fichero);
 		if (ficheroCSV.exists() && ficheroCSV.isDirectory()) {
-			System.out.println("Error ageno al programa, la ruta en la que intentas escribir es un directorio...");
+
+			if (ficheroCSV.exists())Utilidades.mensajeAdaptativo(usarGUI, true, "No existe fichero de datos. Se creará al guardar.");
+			if (!ficheroCSV.isFile())Utilidades.mensajeAdaptativo(usarGUI, true, "Error ageno al programa, el fichero que intentas leer es un directorio.");
+
 			return false;
 		}
 
@@ -123,7 +127,8 @@ public class FicheroLibros {
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.println("Error: La ruta del fichero que intentas escribir no existe.");
+			Utilidades.mensajeAdaptativo(usarGUI, true,
+					"Error: La ruta del fichero que intentas escribir no existe....");
 			e.printStackTrace();
 			return false;
 		}
@@ -141,7 +146,7 @@ public class FicheroLibros {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("Error: Al preparar el buffer de escritura de ficheros.");
+			Utilidades.mensajeAdaptativo(usarGUI, true, "Error: Al preparar el buffer de escritura de ficheros...");
 			try {
 				escritorFichero.close();
 			} catch (IOException e1) {

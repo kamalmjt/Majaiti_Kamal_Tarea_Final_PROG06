@@ -14,11 +14,11 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-public class MainGUI {
+public class MainGUI extends JFrame {
 
 	public static Biblioteca biblioteca = new Biblioteca();
 	public static final String csvBiblioteca = "./datosBiblioteca.csv";
-	
+
 	private static JTextField tfAutor = new JTextField(50);
 	private static JTextField tfISBN = new JTextField(50);
 	private static JTextField tfTitulo = new JTextField(50);
@@ -35,14 +35,14 @@ public class MainGUI {
 
 	public static void main(String[] args) {
 		MainGUI.biblioteca = new Biblioteca();
-		Utilidades.leerCSVBiblioteca(MainGUI.csvBiblioteca, MainGUI.biblioteca);
-		
+		Utilidades.leerCSVBiblioteca(MainGUI.csvBiblioteca, MainGUI.biblioteca, true);
+
 		// Lanzamos la GUI.
 		// https://docs.oracle.com/javase/tutorial/uiswing/concurrency/initial.html
 		SwingUtilities.invokeLater(new Runnable() {
-		    public void run() {
-		    	MainGUI.construirInterfaz();
-		    }
+			public void run() {
+				MainGUI.construirInterfaz();
+			}
 		});
 
 	}
@@ -120,8 +120,6 @@ public class MainGUI {
 		JButton btnDevolver = new JButton("Devolver");
 		JButton btnBuscar = new JButton("Buscar por ISBN");
 		JButton btnGuardar = new JButton("Guardar");
-		
-		
 
 		// Configurar accion de los botones.
 		btnBuscar.addActionListener(e -> accionBuscarPorISBN());
@@ -149,16 +147,15 @@ public class MainGUI {
 	public static void accionBuscarPorISBN() {
 
 		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres buscar:", "Buscar Libro");
-
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
-			Utilidades.MensajeError("El ISBN que buscas no existe.");
+			Utilidades.mensajeError("El ISBN que buscas no existe.");
 			return;
-		} 
+		} else {
+			Libro libroBuscado = MainGUI.biblioteca.buscarLibro(isbn);
+			refrescarTabla(libroBuscado);
+			Utilidades.mensajeInfo("El ISBN que buscas se ha encontrado y se muestra en la tabla filtrado.");
 
-		Libro libroBuscado = MainGUI.biblioteca.buscarLibro(isbn);
-		refrescarTabla(libroBuscado);
-		Utilidades.MensajeInfo("El ISBN que buscas se ha encontrado y se muestra en la tabla filtrado.");
-
+		}
 
 	}
 
@@ -180,61 +177,63 @@ public class MainGUI {
 			modeloTabla.addRow(fila);
 		}
 	}
-	
-	
+
 	public static void accionRefrescarTabla() {
 		refrescarTabla();
-		Utilidades.MensajeInfo("Tabla refrescada con exito.");
+		// Mostramos GUI, Mensaje Informativo con el texto.
+		Utilidades.mensajeAdaptativo(true, false, "Tabla refrescada con exito...");
+		return;
 	}
 
 	public static void accionGuardar() {
-		boolean resultadoSalvado=FicheroLibros.escribirFichero(MainGUI.csvBiblioteca, MainGUI.biblioteca);
-		if (!resultadoSalvado) {
-			Utilidades.MensajeError("Error al guardar el fichero, revisa la consola de excepciones.");
-			return;
-		}
-
-		Utilidades.MensajeInfo("Guardado realizado correctamente.");
+		boolean resultadoSalvado = FicheroLibros.escribirFichero(MainGUI.csvBiblioteca, MainGUI.biblioteca, true);
+		if (resultadoSalvado)
+			Utilidades.mensajeAdaptativo(true, !resultadoSalvado, "Fichero guardado correctamente.");
 	}
-	
-	
+
 	public static void accionDevolver() {
 
-		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres devolver:", "Devolver Libro");
+		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres devolver:",
+				"Devolver Libro");
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
-			Utilidades.MensajeError("El ISBN que quieres devolver no existe. \n Datos del ISBN: " + isbn); 
+			Utilidades.mensajeError("El ISBN que quieres devolver no existe. \n Datos del ISBN: " + isbn);
 			return;
-		} 
-		boolean estadoDevolucion = MainGUI.biblioteca.devolverLibro(isbn);
-		if (!estadoDevolucion) {
-			Utilidades.MensajeError("El Libro que intentas devolver con el ISBN: " + isbn + " no esta prestado.");
-			return;
+		} else {
+			boolean estadoDevolucion = MainGUI.biblioteca.devolverLibro(isbn);
+			if (estadoDevolucion) {
+				refrescarTabla();
+				Utilidades.mensajeInfo("El ISBN con ISBN" + isbn
+						+ " se ha marcado como devuelto y se muestra en la tabla actualizado.");
+			} else {
+				Utilidades.mensajeError("El Libro que intentas devolver con el ISBN: " + isbn + " no esta prestado.");
+			}
+
 		}
-		
-		refrescarTabla();
-		Utilidades.MensajeInfo("El ISBN con ISBN" + isbn +" se ha marcado como devuelto y se muestra en la tabla actualizado.");	
 
 	}
-	
-	
+
 	public static void accionPrestar() {
 
-		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres prestar:", "Prestar Libro");
+		String isbn = Utilidades.leerStringValidaGUI("Introduce el ISBN del libro que quieres prestar:",
+				"Prestar Libro");
 		if (!MainGUI.biblioteca.existeLibro(isbn)) {
-			Utilidades.MensajeError("El ISBN que quieres prestar no existe. \n Datos del ISBN: " + isbn); 
+			Utilidades.mensajeError("El ISBN que quieres prestar no existe. \n Datos del ISBN: " + isbn);
 			return;
-		} 
+		} else {
+			boolean estadoPrestamo = MainGUI.biblioteca.prestarLibro(isbn);
+			if (estadoPrestamo) {
+				refrescarTabla();
+				Utilidades.mensajeInfo("El libro con ISBN " + isbn
+						+ " se ha marcado como prestado y se muestra en la tabla actualizado.");
+			} else {
+				Utilidades.mensajeError("ERROR: El Libro que intentas prestar con el ISBN: " + isbn
+						+ " ya esta prestado previamente y no se puede prestar.");
+			}
 
-		boolean estadoPrestamo = MainGUI.biblioteca.prestarLibro(isbn);
-		if (!estadoPrestamo) {
-			Utilidades.MensajeError("ERROR: El Libro que intentas prestar con el ISBN: " + isbn + " ya esta prestado previamente y no se puede prestar.");
-			return;
 		}
-		
-		refrescarTabla();
-		Utilidades.MensajeInfo("El libro con ISBN "+isbn+" se ha marcado como prestado y se muestra en la tabla actualizado.");	
+
 	}
-	
+
 	public static void limpiarFormulario() {
 
 		tfTitulo.setText("");
@@ -242,39 +241,46 @@ public class MainGUI {
 		tfISBN.setText("");
 		tfTitulo.requestFocus();
 	}
-	
-	public static void accionAnyadir() {
-	    String titulo = tfTitulo.getText();
-	    String autor  = tfAutor.getText();
-	    String isbn   = tfISBN.getText();
-	    
-	    if(!Utilidades.validarStringNumerosYLetrasInsensibleMayus(titulo)) {
-	    	Utilidades.MensajeError("Error, el texto del campo titulo no es valido.");
-	    	return;
-	    };
-	    if(!Utilidades.validarStringNumerosYLetrasInsensibleMayus(autor)) {
-	    	Utilidades.MensajeError("Error, el texto del campo autor no es valido.");
-	    	return;
-	    };
-	    if(!Utilidades.validarStringNumerosYLetrasInsensibleMayus(isbn)) {
-	    	Utilidades.MensajeError("Error, el texto del campo ISBN no es valido.");
-	    	return;
-	    };
 
-	    if((MainGUI.biblioteca.existeLibro(isbn))) {
-	    	Utilidades.MensajeError("Error, ya existe un libro con el ISBN indicado.");
-	    	return;
-	    };
-	    
-	    Libro nuevoLibro=new Libro(isbn, titulo, autor, true);
-	    boolean resultadoAnyadirLibro=MainGUI.biblioteca.anyadirLibro(nuevoLibro);
-	    
-	    if (!resultadoAnyadirLibro) {
-	    	Utilidades.MensajeError("Error al añadir el libro, revisa la consola de excepciones.");
-	    	return ;
-	    }
-		Utilidades.MensajeInfo("El libro se ha añadido con exito, se actualiza y se muestra la tabla.");
-		MainGUI.refrescarTabla();
-		MainGUI.limpiarFormulario();
+	public static void accionAnyadir() {
+		String titulo = tfTitulo.getText();
+		String autor = tfAutor.getText();
+		String isbn = tfISBN.getText();
+
+		if (!Utilidades.validarStringNumerosYLetrasInsensibleMayus(titulo)) {
+			Utilidades.mensajeError("Error, el texto del campo titulo no es valido.");
+			return;
+		}
+		;
+		if (!Utilidades.validarStringNumerosYLetrasInsensibleMayus(autor)) {
+			Utilidades.mensajeError("Error, el texto del campo autor no es valido.");
+			return;
+		}
+		;
+		if (!Utilidades.validarStringNumerosYLetrasInsensibleMayus(isbn)) {
+			Utilidades.mensajeError("Error, el texto del campo ISBN no es valido.");
+			return;
+		}
+		;
+
+		if ((MainGUI.biblioteca.existeLibro(isbn))) {
+			Utilidades.mensajeError("Error, ya existe un libro con el ISBN indicado.");
+			return;
+		}
+		;
+
+		Libro nuevoLibro = new Libro(isbn, titulo, autor, true);
+		boolean resultadoAnyadirLibro = MainGUI.biblioteca.altaLibro(nuevoLibro);
+
+		if (resultadoAnyadirLibro) {
+			Utilidades.mensajeInfo("El libro se ha añadido con exito, se actualiza y se muestra la tabla.");
+			MainGUI.refrescarTabla();
+			MainGUI.limpiarFormulario();
+			return;
+		} else {
+			Utilidades.mensajeError("Error al añadir el libro, revisa la consola de excepciones.");
+			return;
+		}
+
 	}
 }

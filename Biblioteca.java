@@ -12,7 +12,7 @@ public class Biblioteca {
 	}
 	
 
-	public boolean anyadirLibro(Libro libro) {
+	public boolean altaLibro(Libro libro) {
 		String isbn=libro.getIsbn();
 		if (!this.existeLibro(isbn)) {
 			listaLibros.add(libro);

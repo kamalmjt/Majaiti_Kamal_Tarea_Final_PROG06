@@ -7,7 +7,7 @@ public class MainCli {
 	
 
 	public static void main(String[] args) {
-		Utilidades.leerCSVBiblioteca(MainCli.csvBiblioteca, MainCli.biblioteca);
+		Utilidades.leerCSVBiblioteca(MainCli.csvBiblioteca, MainCli.biblioteca, false);
 		imprimirMenuPrincipal();
 
 	}
@@ -59,7 +59,7 @@ public class MainCli {
 				break;
 				
 			case 6:
-				boolean resultadoSalvado=FicheroLibros.escribirFichero(csvBiblioteca, biblioteca);
+				boolean resultadoSalvado=FicheroLibros.escribirFichero(csvBiblioteca, biblioteca, false);
 				String mensaje=(resultadoSalvado)?"Guardado realizado correctamente.":"Error al guardar el fichero";
 				System.out.println(mensaje);
 				Utilidades.pausarInteracion();
@@ -90,7 +90,7 @@ public class MainCli {
 		String autor=Utilidades.leerStringValida("autor");
 		
 		Libro libroNuevoAlta=new Libro(isbn, titulo, autor, true);
-		boolean resultadoAlta=MainCli.biblioteca.anyadirLibro(libroNuevoAlta);
+		boolean resultadoAlta=MainCli.biblioteca.altaLibro(libroNuevoAlta);
 		String mensaje=(resultadoAlta)?"El libro se ha dado de alta correctamente.":"El libro no se ha dado de alta";
 		System.out.println(mensaje);
 		return;		

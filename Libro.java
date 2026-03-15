@@ -18,7 +18,7 @@ public class Libro {
 		return isbn;
 	}
 
-	private void setIsbn(String isbn) {
+	public void setIsbn(String isbn) {
 		this.isbn = isbn;
 	}
 
@@ -26,7 +26,7 @@ public class Libro {
 		return titulo;
 	}
 
-	private void setTitulo(String titulo) {
+	public void setTitulo(String titulo) {
 		this.titulo = titulo;
 	}
 
@@ -34,7 +34,7 @@ public class Libro {
 		return autor;
 	}
 
-	private void setAutor(String autor) {
+	public void setAutor(String autor) {
 		this.autor = autor;
 	}
 
@@ -43,7 +43,7 @@ public class Libro {
 	}
 
 	public String getDisponibleStr() {
-		return (this.disponible)?"Disponible":"No disponible";
+		return (this.disponible)?"Si":"No";
 	}
 
 	
